@@ -55,6 +55,13 @@ function calcResult(calcType) {
   ) {
     return; //this will stop the rest of the code from running if there is no valid calcType
   }
+
+  /* 
+  You could reverse the logic, but it would result it nesting all the code in the following if statement and this approach above is better
+  if (calcType === 'ADD' || calcType === 'SUBTRACT' || calcType === 'MULTIPLY' || calcType === 'DIVIDE') {
+
+  } 
+  */ 
   createAndWriteOutput(mathOperator, initialResult, enteredNumber);
   writeToLog(calcType, initialResult, enteredNumber, currentResult);
 }
