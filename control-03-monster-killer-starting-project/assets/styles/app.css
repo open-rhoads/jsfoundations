@@ -74,6 +74,10 @@ button:active {
   flex-direction: column;
 }
 
+#health-levels h2 {
+  text-transform: uppercase;
+}
+
 #bonus-life {
   font-weight: bold;
   color: white;
