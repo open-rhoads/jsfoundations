@@ -51,7 +51,8 @@ function calcResult(calcType) {
     calcType !== 'ADD' &&
     calcType !== 'SUBTRACT' &&
     calcType !== 'MULTIPLY' &&
-    calcType !== 'DIVIDE'
+    calcType !== 'DIVIDE' ||
+    !enteredNumber
   ) {
     return; //this will stop the rest of the code from running if there is no valid calcType
   }
