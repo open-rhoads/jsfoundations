@@ -36,28 +36,38 @@ function writeToLog(ev, val, monsterHealth, playerHealth) {
     event: ev,
     value: val,
     finalMonsterHealth: monsterHealth,
-    finalPlayerHealth: playerHealth,
+    finalPlayerHealth: playerHealth
   };
 
-  if (ev === LOG_EVENT_PLAYER_ATTACK) {
-    logEntry.target = 'MONSTER';
-  } else if (ev === LOG_EVENT_PLAYER_STRONG_ATTACK) {
-    logEntry.target = 'MONSTER';
-  } else if (ev === LOG_EVENT_MONSTER_ATTACK) {
-    logEntry.target = 'PLAYER';
-  } else if (ev === LOG_EVENT_PLAYER_HEAL) {
-    logEntry.target = 'PLAYER';
+  //without a break statement in a case, the switch statement will continue execute further cases
+  switch (ev) {
+    case LOG_EVENT_PLAYER_ATTACK:
+      logEntry.target = 'MONSTER';
+      break;
+    case LOG_EVENT_PLAYER_STRONG_ATTACK:
+      logEntry.target = 'MONSTER';
+      break;
+    case LOG_EVENT_MONSTER_ATTACK:
+      logEntry.target = 'PLAYER';
+      break;
+    case LOG_EVENT_PLAYER_HEAL:
+      logEntry.target = 'PLAYER';
+      break;
+    default:
+      logEntry = {};
   }
 
-  if (
-    ev !== LOG_EVENT_GAME_OVER ||
-    ev !== LOG_EVENT_PLAYER_ATTACK ||
-    ev !== LOG_EVENT_PLAYER_STRONG_ATTACK ||
-    ev !== LOG_EVENT_PLAYER_HEAL ||
-    ev !== LOG_EVENT_MONSTER_ATTACK
-  ) {
-    return;
-  }
+  //converting this if logic to a switch statement... which will allow for better handling for a default
+  // if (ev === LOG_EVENT_PLAYER_ATTACK) {
+  //   logEntry.target = 'MONSTER';
+  // } else if (ev === LOG_EVENT_PLAYER_STRONG_ATTACK) {
+  //   logEntry.target = 'MONSTER';
+  // } else if (ev === LOG_EVENT_MONSTER_ATTACK) {
+  //   logEntry.target = 'PLAYER';
+  // } else if (ev === LOG_EVENT_PLAYER_HEAL) {
+  //   logEntry.target = 'PLAYER';
+  // }
+
   battleLog.push(logEntry);
 }
 
@@ -120,20 +130,15 @@ function endRound() {
 
 //function to attach the monster accepts the mode, delivers attack, then calls endRound()
 function attackMonster(attackMode) {
-  let maxDamage;
-  let logEvent;
-  if (attackMode === MODE_ATTACK) {
-    maxDamage = ATTACK_VALUE;
-    logEvent = LOG_EVENT_PLAYER_ATTACK;
-  } else if (attackMode === MODE_STRONG_ATTACK) {
-    maxDamage = STRONG_ATTACK_VALUE;
-    logEvent = LOG_EVENT_PLAYER_STRONG_ATTACK;
-  }
-  const damange = dealMonsterDamage(maxDamage);
-  currentMonsterHealth -= damange;
+  //using a ternary to determine the attack mode and assign the applicable attack value and log event
+  const maxDamage = attackMode === MODE_ATTACK ? ATTACK_VALUE : STRONG_ATTACK_VALUE;
+  const logEvent = attackMode === MODE_ATTACK ? LOG_EVENT_PLAYER_ATTACK : LOG_EVENT_PLAYER_STRONG_ATTACK;
+
+  const damage = dealMonsterDamage(maxDamage);
+  currentMonsterHealth -= damage;
   writeToLog(
     logEvent,
-    damange,
+    damage,
     currentMonsterHealth,
     currentPlayerHealth
   );
@@ -171,7 +176,26 @@ function healPlayerHandler() {
 
 //using the console to output for now
 function printLogHandler() {
-  console.log(battleLog);
+  for (let i = 0; i < 3; i++) {
+    console.log('-------------')
+  }
+
+  
+  //although you can use a for loop through the object, there is the for of loop option for arrays, which is shorter to code
+  // for (let i = 0; i < battleLog.length; i++) {
+  //   console.log(battleLog[i]);
+  // }
+  let i = 0;
+  for (const logEntry of battleLog) {
+    //console.log(logEntry);
+    console.log(`#${i}`);
+    for (const key in logEntry) {
+      //console.log(key);
+      console.log(`${key} => ${logEntry[key]}`);
+    }
+    i++
+  }
+  //console.log(battleLog);
 }
 
 attackBtn.addEventListener('click', attackHandler);
