@@ -12,12 +12,31 @@ const LOG_EVENT_MONSTER_ATTACK = 'MONSTER ATTACK';
 const LOG_EVENT_PLAYER_HEAL = 'PLAYER HEAL';
 const LOG_EVENT_GAME_OVER = 'GAME OVER';
 
-//allow the user to set the max life value & check if valid
-const enteredValue = prompt('Maximum life for you and the monster.', '100');
-let chosenMaxLife = parseInt(enteredValue);
-if (isNaN(chosenMaxLife) || chosenMaxLife <= 0) {
-  chosenMaxLife = 100;
+function getMaxLife() {
+  //allow the user to set the max life value & check if valid
+  const enteredValue = prompt('Maximum life for you and the monster.', '100');
+  let parsedValue = parseInt(enteredValue); 
+  //parseInt won't throw an error if the user enters something invalid, it will just generate a NaN value
+  if (isNaN(parsedValue) || parsedValue <= 0) {
+    //this will generate an error in the console with this object and terminate the program
+    throw {message: 'Invalid user input, not a number!'};
+  }
+  return parsedValue;
 }
+
+//so let's use try/catch...
+let chosenMaxLife;
+try {
+  chosenMaxLife = getMaxLife();
+} catch (error) {
+  console.log(error);
+  //here we are able to use a default value, but in some cases, you might only be able to show a message
+  chosenMaxLife = 100;
+  alert('Wrong entry. Default value of 100 was used.');
+} //finally is not needed in this case...
+//finally {
+  
+//}
 
 //define variables for health and initialize with max life value
 let currentMonsterHealth = chosenMaxLife;
