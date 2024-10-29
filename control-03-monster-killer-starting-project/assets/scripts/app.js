@@ -26,6 +26,7 @@ let currentPlayerHealth = chosenMaxLife;
 let hasBonusLife = true;
 //array for the battle log
 let battleLog = [];
+let lastLoggedEntry;
 
 //initialize the progress bars to the chosen max life value
 adjustHealthBars(chosenMaxLife);
@@ -180,6 +181,17 @@ function printLogHandler() {
     console.log('-------------')
   }
 
+  let j=0;
+  outerWhile: do {
+    console.log("Outer", j);
+    innerFor: for (let k = 0; k < 5; k++) {
+      if (k === 3) {
+        break outerWhile;
+      }
+      console.log("Inner", k);
+    }
+    j++;
+  } while (j < 3);
   
   //although you can use a for loop through the object, there is the for of loop option for arrays, which is shorter to code
   // for (let i = 0; i < battleLog.length; i++) {
@@ -188,12 +200,17 @@ function printLogHandler() {
   let i = 0;
   for (const logEntry of battleLog) {
     //console.log(logEntry);
-    console.log(`#${i}`);
-    for (const key in logEntry) {
-      //console.log(key);
-      console.log(`${key} => ${logEntry[key]}`);
+    if (!lastLoggedEntry && lastLoggedEntry !== 0 || lastLoggedEntry < i) {
+      console.log(`#${i}`);
+      for (const key in logEntry) {
+        //console.log(key);
+        console.log(`${key} => ${logEntry[key]}`);
+      }
+      lastLoggedEntry = i;
     }
     i++
+    //adding break here will mean that only one log entry is logged because the loop will end
+    break;
   }
   //console.log(battleLog);
 }
