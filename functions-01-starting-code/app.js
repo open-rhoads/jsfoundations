@@ -104,7 +104,7 @@ startGameBtn.addEventListener('click', () => {
 //this will build an array from all the arguments passed (singularly), so you don't need to pass the arg as an array
 //you can only have one rest operator in the parameter list and it needs to be the last arg because it will consume all args and merge into an array
 //if you have parameters before the rest operator, then the first args passed will be in those and the rest in an array
-const sumUp = (a, b, ...numbers) => {
+const combine = (resultHandler, operation, ...numbers) => {
   //you can nest functions inside each other, just like objects because they are objects
   //this function now has block scope
   //usually functions should have global scope, but some cases where this makes sense
@@ -113,10 +113,22 @@ const sumUp = (a, b, ...numbers) => {
   };
   let sum = 0;
   for (const num of numbers) {
-    sum += num;
+    if (operation === 'ADD') {
+      sum += validateNumber(num);
+    } else {
+      sum -= validateNumber(num);
+    }
   }
-  return sum;
+  resultHandler(sum);
 };
+
+// const subtractUp  = function(resultHandler, ...numbers) {
+//   let sum = 0;
+//   for (const num of numbers) {
+//     sum -= num;
+//   }
+//   resultHandler(sum);
+// };
 
 //if not using an arrow function, you can also use the rest operator and it also has the automatic arguments variable - ONLY when using the function keyword
 //but this is bad practice, should use rest operator
@@ -128,5 +140,13 @@ const sumUp = (a, b, ...numbers) => {
 //   return sum;
 // }
 
-console.log(sumUp(1, 5, 10, -3, 6, 10));
-//console.log(subtractUp(1, 10, 15, 20));
+const showResult = ( messageText, result) => {
+  alert(messageText + result);
+};
+
+//the bind() method returns a reference to the function with the parameters predefined
+//takes two args - the value for this (the function...?) and then the parameters that you want to include
+//bind prepares the function for execution
+combine(showResult.bind(this, 'The result after adding all numbers is: '), 'ADD', 1, 5, 10, -3, 6, 10);
+combine(showResult.bind(this, 'The result after adding all numbers is: '), 'ADD', 1, 5, 10, -3, 6, 10, 25, 88);
+combine(showResult.bind(this, 'The result after subtracting all numbers is: '), 'SUBTRACT', 1, 10, 15, 20);
