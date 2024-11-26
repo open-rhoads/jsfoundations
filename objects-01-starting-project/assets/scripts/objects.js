@@ -1,47 +1,66 @@
-//get the movie list and style it...
-const movieList = document.getElementById('movie-list');
-//you can use either dot notation or bracket notation to access the style methods that allow you to change styles; 
-//and with brackets, you can use the traditional CSS property names:
-movieList.style['background-color'] = 'red';
-//movieList.style.backgroundColor = 'red';
-movieList.style.display = 'block';
+const addMovieBtn = document.getElementById('add-movie-btn');
+const searchBtn = document.getElementById('search-btn');
 
-const userChosenKeyName = 'level'; //what else can we do with brackets...if we want this to be a new key name, we need to add this variable with the brackets in the object
+const movies = [];
 
-//keys are similar to variables, but with more flexibility because you can use any string as a key - since all keys are coerced into a string
-//generally, you should still follow the rules variables would, but you can technically do the following with a key (using first name as example)
-//property order...this will be retained
-const person = {
-  'first name': 'Mikaela',
-  age: 32,
-  hobbies: ['yoga', 'dancing', 'hiking', 'cooking'],
-  [userChosenKeyName]: '...', //the brackets tell JS that this is a variable, not a new key name
-  greet: function() {
-    alert(`Hi ${person['first name']}`);
-  },
-  //you can use numbers for key names, but they will be coerced into strings. Cannot use negative numbers. Probably not done a lot
-  1.5: 'hello'
+const renderMovies = (term = '') => {
+  const movieList = document.getElementById('movie-list');
+  if (movies.length === 0) { //no movies exist
+    movieList.classList.remove('visible'); //remove the visible class from the movie list, which will hide it
+  } else {
+    movieList.classList.add('visible'); //add the visible class
+  }
+  movieList.innerHTML = ''; //clear the movie list...this is not the best performance to re-render it every time...appending might be better, but saving time
+  
+  const filteredMovies = !term
+    ? movies //display all movies if the string is flasy/still blank
+    : movies.filter((movie) => movie.info.title.includes(term)); //or filter the movies and display only ones that match the entered term
+  
+    filteredMovies.forEach((movie) => {//pass anonymous function to the forEach() method of the array (loops)
+    const movieElement = document.createElement('li');
+    // movieElement.textContent = movie.info.title;
+    let text = movie.info.title + ' - '; //this is 'chaining' the propertes/method...
+    //loop through the object keys
+    for (key in movie.info) {
+      if (key !== 'title') { //compare the key to the string version of what you're looking for, because keys are strings
+        //this would be the one the user entered
+        //using the loop and the key variable allows us to dynamically get what the user entered for the extra property
+        text += `${key} : ${movie.info[key]}`
+      }
+    }
+    movieElement.textContent = text;
+    movieList.append(movieElement);
+  })
+}
+
+const addMovie = () => {
+  //get values entered by user in the text boxes
+  const title = document.getElementById('title').value;
+  const extraKey = document.getElementById('extra-name').value;
+  const extraValue = document.getElementById('extra-value').value;
+
+  //validate if anything is empty
+  if (title.trim() === '' || extraKey.trim() === '' || extraValue.trim() === '') {return;}
+
+  //create movie object
+  const newMovie = {
+    //when keys and values (via variable) are named the same (like title), you can omit the second one and the colon:
+    info: {
+      title,
+      [extraKey]: extraValue
+    },
+    id: Math.random().toString() //this first gets a random number, then turns it into a string via chaining - helpful to keep code concise
+  };
+  movies.push(newMovie);
+  console.log(newMovie);
+  renderMovies();
 };
-//you have to use the square bracket notation and refer to the string key when you use strings are keys
-//you can also mae it more dynamic by putting the key names in variables when you use bracket notation
-//console.log(person['first name']);
-let keyName = 'first name';
-console.log(person[keyName]); //anything that yields a value can be inserted into the brackets to search the object
-//again you need bracket notation if the key is a number
-console.log(person[1.5]);
-//let's log the whole object to examine properties...when you expand the object, it will sort them alphabetically, but when it is collapsed, they show in order added
-//unless you have all number keys in which case they are always sorted
-console.log(person);
 
-//how to add a property
-//you could use let above and then re-assign everything, but it is verbiose...
-//instead...use dot notation. You can also edit properties this way
-person.isAdmin = true; //accessing a property that does not exist will give you undefined...setting a value will add the property if it does not exist
-person.age = 33; //age is now 33... sigh
-//delete a property with the delete keyword and the dot notation
-delete person.age; //ageless ;)
-//you could also use dot notation and set it to undefined, but you shouldn't really purposefully set the value to undefined...
-//technically the property would still be there, but the effect is the same
-//null is not the same as undefined and is a value you can use to empty it, but keep the property defined
+const searchMovies = () => {
+  const filterTerm = document.getElementById('filter-title').value;
 
-person.greet();
+  renderMovies(filterTerm);
+}
+
+addMovieBtn.addEventListener('click', addMovie);
+searchBtn.addEventListener('click', searchMovies);
