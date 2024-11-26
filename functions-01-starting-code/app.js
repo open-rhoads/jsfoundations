@@ -146,7 +146,9 @@ const showResult = ( messageText, result) => {
 
 //the bind() method returns a reference to the function with the parameters predefined
 //takes two args - the value for this (the function...?) and then the parameters that you want to include
-//bind prepares the function for execution
+//bind prepares the function for execution...
+//showResult is passed and bound as the first arg for combine()...provdes first arg for showResult ...how is the result derived? Just from calling showResult...? 
+//call() and apply() are similar to bind(), but they also would execute the function, which we do not wante here
 combine(showResult.bind(this, 'The result after adding all numbers is: '), 'ADD', 1, 5, 10, -3, 6, 10);
 combine(showResult.bind(this, 'The result after adding all numbers is: '), 'ADD', 1, 5, 10, -3, 6, 10, 25, 88);
 combine(showResult.bind(this, 'The result after subtracting all numbers is: '), 'SUBTRACT', 1, 10, 15, 20);

@@ -67,23 +67,24 @@ function calcResult(calcType) {
   writeToLog(calcType, initialResult, enteredNumber, currentResult);
 }
 
-function add() {
-  calcResult('ADD');
-}
+// function add() {
+//   calcResult('ADD');
+// }
 
-function subtract() {
-  calcResult('SUBTRACT');
-}
+// function subtract() {
+//   calcResult('SUBTRACT');
+// }
 
-function multiply() {
-  calcResult('MULTIPLY');
-}
+// function multiply() {
+//   calcResult('MULTIPLY');
+// }
 
-function divide() {
-  calcResult('DIVIDE');
-}
+// function divide() {
+//   calcResult('DIVIDE');
+// }
 
-addBtn.addEventListener('click', add);
-subtractBtn.addEventListener('click', subtract);
-multiplyBtn.addEventListener('click', multiply);
-divideBtn.addEventListener('click', divide);
+//bind prepares, but does not execute the function we are passing as the second parameter; and we can also prepare the args that will be sent
+addBtn.addEventListener('click', calcResult.bind(this, 'ADD'));
+subtractBtn.addEventListener('click', calcResult.bind(this, 'SUBTRACT'));
+multiplyBtn.addEventListener('click', calcResult.bind(this, 'MULTIPLY'));
+divideBtn.addEventListener('click', calcResult.bind(this, 'DIVIDE'));
