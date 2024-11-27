@@ -12,20 +12,32 @@ const renderMovies = (term = '') => {
   }
   movieList.innerHTML = ''; //clear the movie list...this is not the best performance to re-render it every time...appending might be better, but saving time
   
+  //since this function is repeatedly concerned with movie.info property, we can use object destructuring to pull out that key/value in a new variable
   const filteredMovies = !term
-    ? movies //display all movies if the string is flasy/still blank
+    ? movies //display all movies if the string is falsy/still blank
     : movies.filter((movie) => movie.info.title.includes(term)); //or filter the movies and display only ones that match the entered term
   
     filteredMovies.forEach((movie) => {//pass anonymous function to the forEach() method of the array (loops)
     const movieElement = document.createElement('li');
-    // movieElement.textContent = movie.info.title;
-    let text = movie.info.title + ' - '; //this is 'chaining' the propertes/method...
+    //you can use the 'in' keyword to check if a property exists - dynamic programs can have unsure property values. 
+    //Add parentheses and the not operator to check the opposite...and you could also use dot notation to check if it is equal to undefined
+    // if ('info' in movie) {
+
+    // }
+    //OBJECT DESTRUCTURING
+    //braces on the left allow you to enter a key name (only) inside and now that property is stored in the variable name (info) and set it equal to the object with the key name
+    const {info, ...otherProps} = movie; //you can then also use the rest operator and a second param/prop name that will catch all other properties and store in that object
+    //you could have also checked for the existence of the info variable here because if it wasn't set before, it wouldn't be here
+    console.log(otherProps);
+    const {title: movieTitle, ...restProps} = info; //the colon allows you to assign a new name to the new object/prop in case there are name conflicts
+    console.log(restProps);
+    let text = movieTitle + ' - '; //this is 'chaining' the propertes/method...
     //loop through the object keys
-    for (key in movie.info) {
+    for (key in info) {
       if (key !== 'title') { //compare the key to the string version of what you're looking for, because keys are strings
         //this would be the one the user entered
         //using the loop and the key variable allows us to dynamically get what the user entered for the extra property
-        text += `${key} : ${movie.info[key]}`
+        text += `${key} : ${info[key]}`
       }
     }
     movieElement.textContent = text;
