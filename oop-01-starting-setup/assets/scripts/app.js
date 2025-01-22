@@ -11,19 +11,28 @@
 class ElementAttribute {
   constructor (attrName, attrValue) {
     this.name = attrName;
-    this.value = attrValue
+    this.value = attrValue;
   }
 }
 
 class Component {
-  constructor(renderHookId) {
-    this.hookId = renderHookId
+  //another solution to solving the problem of needing to render content before data has arrived is to add another param here of whether to render
+  //we'll use a default value of true that can be overriden when called, if desired
+  constructor(renderHookId, shouldRender = true) {
+    this.hookId = renderHookId;
+    if (shouldRender) {
+      this.render(); //render is called in parent constructor - empty here and will be overridden by the version in the subclasses. 
+      //When called, the subclass version will run because this always refers to what called the method, which will almost always be the object you're creating
+      //new keyword makes sure that 'this' is bound to the object being created
+    }
   }
+
+  render () {} //adding render so it is clear why it is called above
 
   createRootElement(tag, classes, attributes) {
     const rootElement = document.createElement(tag);
     if (classes) {
-      rootElement.className = classes; //why don't we have to use a loop here...
+      rootElement.className = classes; 
     }
     if (attributes && attributes.length > 0) {
       for (const attr of attributes) {
@@ -41,7 +50,7 @@ class Product {
   //if you're using a constructor, you can just assign the necessary data in the constructor as class properties because it will override anyway
   //methods are added similar to traditional function declarations...(name, parentheses, & curly braces) doesn't need a semi-colon
   //defining a constructor method in this class will allow us to send values to the fields/props in place of the default when we create objects
-  //define the params/args it can accept and inside thebraces, you can assign the values with the 'this' keyword
+  //define the params/args it can accept and inside the braces, you can assign the values with the 'this' keyword
   constructor(title, image, price, desc) {
     this.title = title;
     this.imageURL = image;
@@ -53,8 +62,9 @@ class Product {
 //Product Item class - this is separate from the Product because this is the rendering logic, whereas the product is simply the data
 class ProductItem extends Component {
   constructor(product, renderHookId) {
-    super(renderHookId);
+    super(renderHookId, false); //passing the second parameter so the parent constructor does not render the content without product being set
     this.product = product;
+    this.render(); //and we render it here instead
   }
 
   addToCart() {
@@ -83,36 +93,75 @@ class ProductItem extends Component {
 //Product List Class - it is hard to create true object-oriented code that is reusable with the object literal notation, so this was re-factored to use classes
 //Objects can also hold more logic like the below...
 class ProductList extends Component {
-  //here we'll use a field for the products array and set values right away
-  products = [
-    //using the new keyword and calling the class name with parentheses returns a new object with the above class structure
-    //pass in any expected params defined in theclass
-    new Product('Pillow', 'https://linensociety.com/products/heirloom-pillow', 19.99, 'a soft pillow.'),
-    new Product('carpet', 'https://linensociety.com/products/heirloom-pillow', 89.99, 'super cool carpet.')
-  ];
-  //adding a constructor in case it is needed, but we don't need to set the values because it is done above
+  //defining the products array as private by including a hashtag # in front of the name and then you also need to include it any time it is called
+  #products = [];
+  
+  //the super(); constructor (parent constructor) must be called before any other properties are added or set or the 'this' keyword can be used
+  //but it has to be after we add the products array below because render() is also called inside super...and render will need the products data
+  //but you still always have to call super() first, so how do we solve this? keep super in the constructor and add separate method for getting data
+  //so we can call super() first and then use 'this' to call fetchProducts() method
+  //it is a common problem that you might need to render some content only after the data has arrived...this is a solution...
+  // //you load an empty element structure and then load data only once it is available
+  //constructor
   constructor(renderHookId) {
-    super(renderHookId);
+    //now that the products property array is private, we will not render when the super constructor is called by passing the second argument of false
+    super(renderHookId, false);
+    //we will manually call render here instead. 
+    // //This will prevent a type error from being called when we instantiate an object from this class and call render to render the products...
+    //now he is saying that it is a bit redundant to still have render in the base class...but keeping it in as an example...
+    this.render();
+    this.fetchProducts();
   }
+
+  fetchProducts() {
+    //later, this would be done with an http request to load the products from a database
+    //since we are using a hard-coded option for the products, let's make it a private property - only accessible in this class
+    this.#products = [
+      //here we'll use a field for the products array and set values right away
+      //using the new keyword and calling the class name with parentheses returns a new object with the above class structure
+      //pass in any expected params defined in the class
+      new Product('Pillow', 'https://linensociety.com/products/heirloom-pillow', 19.99, 'a soft pillow.'),
+      new Product('carpet', 'https://linensociety.com/products/heirloom-pillow', 89.99, 'super cool carpet.')
+    ];
+    //calling renderProducts() here too once the products have been fetched...because they weren't there the fist time when the constructor called render()...
+    this.renderProducts();
+  }
+
+  //separating the rendering of the products so we can call this conditionally in render() only if the products are there
+  renderProducts() {
+    for (const prod of this.#products) {
+      new ProductItem(prod, 'prod-list');
+      //product.render(); removing redundant render methods and no longer storing
+    }
+  }
+
   render() {
-    //adding an id property for the ProductList to be passed to constructor
+    //creating the root element and adding an id property for the ProductList to be passed to constructor
     this.createRootElement('ul', 'product-list', [
       new ElementAttribute('id', 'prod-list')
     ]);
-    for (const prod of this.products) {
-      const product = new ProductItem(prod, 'prod-list');//he hard coded the id as string...and it was prod-list...
-      product.render();
+    //we only try to render the products if products exist and the length is greater than zero
+    //in our case, they won't be there when it is called the first time by super(), but they will be after the products are fetched...
+    if (this.#products && this.#products.length > 0) {
+      this.renderProducts();
     }
   }
 }
-
 
 //Shopping Cart class - 
 class ShoppingCart extends Component {
   items = [];
   
   constructor(renderHookId) {
-    super(renderHookId);
+    //passing false as second arg to super() so that render() is not called before the orderProducts field/method can be created.
+    super(renderHookId, false);
+    //let's then add the orderProducts as a property here... for our purposes, this is almost the same as a field. The difference is advanced...
+    this.orderProducts = () => {
+      console.log('Ordering...');
+      console.log(this.items);
+    }
+    //and then we can manually call render
+    this.render();
   }
 
   set cartItems(value) {
@@ -139,6 +188,10 @@ class ShoppingCart extends Component {
       <h2>Total: \$${0}</h2>
       <button>Order Now!</button>
     `;
+    const orderButton = cartEl.querySelector('button');
+    //can use arrow function which does not recognize 'this' and so 'this' will revert back to what it would be otherwise (calling code), which is the class
+    //could've also chained .bind(this) to orderProducts...or even make orderProducts() an arrow function instead and make this call without parentheses (which is what we did)
+    orderButton.addEventListener('click', this.orderProducts);
     this.totalOutput = cartEl.querySelector('h2');
     return cartEl;
   }
@@ -146,15 +199,21 @@ class ShoppingCart extends Component {
 
 
 //Shop Class will now be the root of the app and will render both the ShoppingCart and the ProductList
-class Shop /* extends Component*/ {
+class Shop extends Component {
+  //don't need to pass args to the super(); constructor in this case because we're not using the renderhookid
+  constructor() {
+    //you could also call this.render(); here and not extend the class since the only thing you needed was the render method...
+    super(); 
+  }
 
   render() {
     //const renderHook = document.getElementById('app');
     //storing a new cart as a new property of this Shop class uing 'this' and dot notation
     this.cart = new ShoppingCart('app'); //sending the Id value to the constructor
-    this.cart.render();
-    const productList = new ProductList('app');
-    productList.render();
+    //this.cart.render(); removing redundant render methods...and no longer storing the ProductList in a variable
+    //making the products private above ensures that you cannot assign a new products value when you instantiate a ProductList object
+    new ProductList('app');
+    //productList.render();
   }
 }
 
@@ -164,8 +223,8 @@ class App {
   //using 'this' in a static method would always refer to the class itself, NOT an object instantiated from the class
   static init() {
     const shop = new Shop();
-    shop.render();
-    //add a cart property to the App class that equals the shop cart property
+    //shop.render(); removing redundant render method...still storing the shop because we need to access its methods below
+    //set cart property/field of the App class equal to the shop cart property
     this.cart = shop.cart;
   }
   //add another static method to add to cart that uses the addProduct() method now available through the cart property
