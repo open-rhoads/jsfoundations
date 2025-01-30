@@ -5,7 +5,33 @@
 
 // Tooltip class for the button
 class Tooltip {
-
+  //constructo accepts a function to indicate whether the tooltip is closed...
+  constructor(closeNotifierFunction) {
+    this.closeNotifier = closeNotifierFunction;
+  }
+  closeTooltip = () => {
+    this.detach();
+    this.closeNotifier(); //call the closeNotifier when the tooltip is closed, 
+    // which is the anonymous function that will set hasActiveTooltip to false
+  }
+  detach() {
+    this.element.remove(); //remove the element
+    //this.element.parentElement.removeChild(this.element); //remove it for older browsers that don't support remove()
+    
+  }
+  attach() {
+    console.log('Here is the Tooltip...');
+    //create a tooltip element and add a class that will give it some styling
+    const tooltipElement = document.createElement('div');
+    tooltipElement.className = 'card';
+    tooltipElement.textContent = 'Heyyyy!'; //text content
+    // event listener to call the detach() method and remove the tooltip 
+    // need tp use bind(this) so it will refer to the class, not the global object (event listener)... 
+    // OR use an arrow function for the closeTooltip method, slightly less efficient, but ok in this app/let's demo
+    tooltipElement.addEventListener('click', this.closeTooltip);
+    this.element = tooltipElement; //store the tooltip element as a property so the detach() method can refer to it
+    document.body.append(tooltipElement); //append it to the body (for now...)
+  }
 }
 
 //helper class for moving a ProjectItem DOM node
@@ -42,6 +68,8 @@ class ProjectItem {
   //'switch' button that says either Finish or Activate
   //let's accept a type here to indicate which list we are in
   connectSwitchButton(type) {
+    //add property to indicate if tooltip exists (initially false)
+    this.hasActiveTooltip = false;
     const projectItemElement = document.getElementById(this.id);
     // selects the last button in the element with the passed id that we stored above
     let switchBtn = projectItemElement.querySelector('button:last-of-type');
@@ -65,9 +93,28 @@ class ProjectItem {
     // so now it gets tied to the new updateProjectListsHandler that we set
     this.connectSwitchButton(type);
   }
+  //this is the helper method for the tooltip button
+  showMoreInfoHandler() {
+    //check the hasActiveTooltip property and return if true to prevent duplicates if there is already one
+    if (this.hasActiveTooltip) {
+      return;
+    }
+    //create a new tooltip using the tooltip class
+    //passing an anonymous function that will set the hasActiveTooltip property to false
+    const tooltip = new Tooltip(() => {
+      this.hasActiveTooltip = false;
+    });
+    //call the attach() method of the tooltip class
+    tooltip.attach(); 
+    this.hasActiveTooltip = true;
+  }
   //this is the tooltip button
   connectMoreInfoButton() {
-
+    //grab both buttons using methods from the DOM
+    const projectItemElement = document.getElementById(this.id); 
+    const moreInfoBtn = projectItemElement.querySelector('button:first-of-type');
+    //add event listener to the More Info button to call another event handler
+    moreInfoBtn.addEventListener('click', this.showMoreInfoHandler);
   }
 }
 
