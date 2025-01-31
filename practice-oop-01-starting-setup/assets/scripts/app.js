@@ -3,23 +3,47 @@
 // but let's practice an object oriented approach 
 // use classes to get the element, perform the logic
 
+//add inheritance - base component class with detch and attach methods
+class Component {
+  constructor(hostElementId, insertBefore = false) {
+    //if an id is provided
+    if (hostElementId) {
+      //set it as a property of the class
+      this.hostElement = document.getElementById(hostElementId);
+    } else { //otherwise, set the body as the hostElement
+      this.hostElement = document.body;
+    }
+    this.insertBefore = insertBefore; //store insertBefore in property
+  }
+  detach() {
+    //check if element is set
+    if (this.element) {
+      this.element.remove(); //remove the element
+    }
+    //this.element.parentElement.removeChild(this.element); //remove it for older browsers that don't support remove()
+  }
+  attach() {
+    //use insertAdjacentElement() method and pass ternary expression to define the id...where to place...
+    this.hostElement.insertAdjacentElement(this.insertBefore ? 'afterbegin' : 'beforeend', this.element);
+    // document.body.append(this.element); new approach
+  }
+}
+
 // Tooltip class for the button
-class Tooltip {
-  //constructo accepts a function to indicate whether the tooltip is closed...
+class Tooltip extends Component {
+  //constructor accepts a function to indicate whether the tooltip is closed...
   constructor(closeNotifierFunction) {
+    super(); //no values will mean it as appended to the body default. we can include an id and/or true to move tooltip
     this.closeNotifier = closeNotifierFunction;
+    this.create(); //run the create method so the toolTip element is instantiated
   }
   closeTooltip = () => {
     this.detach();
     this.closeNotifier(); //call the closeNotifier when the tooltip is closed, 
     // which is the anonymous function that will set hasActiveTooltip to false
   }
-  detach() {
-    this.element.remove(); //remove the element
-    //this.element.parentElement.removeChild(this.element); //remove it for older browsers that don't support remove()
-    
-  }
-  attach() {
+
+  create() {
     console.log('Here is the Tooltip...');
     //create a tooltip element and add a class that will give it some styling
     const tooltipElement = document.createElement('div');
@@ -30,8 +54,8 @@ class Tooltip {
     // OR use an arrow function for the closeTooltip method, slightly less efficient, but ok in this app/let's demo
     tooltipElement.addEventListener('click', this.closeTooltip);
     this.element = tooltipElement; //store the tooltip element as a property so the detach() method can refer to it
-    document.body.append(tooltipElement); //append it to the body (for now...)
   }
+
 }
 
 //helper class for moving a ProjectItem DOM node
