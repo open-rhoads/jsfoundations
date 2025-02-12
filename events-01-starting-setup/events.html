@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Events!</title>
+    <link rel="stylesheet" href="assets/styles/events.css" />
+    <script src="assets/scripts/events.js" defer></script>
+  </head>
+  <body>
+    <div>
+      <h2>Events in JavaScript</h2>
+      <!-- You can use an attribute - there are several you can use 
+       the value should be JavaScript that will run when the event occurs 
+       but this approach is discouraged because it contaminates HTML with JS 
+       and it's not reusable... 
+       NO: <button onclick="">Click me</button> -->
+      <button>Click me</button>
+      <button>Click me too!!</button>
+    </div>
+    <!-- Let's use a form to practice more events
+     we'll leave action blank, so it will go nowhere
+     but the default behavior of the submit button inside the form will still be to reload the page
+     we may want to prevent this so we can validate data with JS -->
+    <form action="">
+      <label for="title">Title</label>
+      <input type="text" id="title" />
+      <button type="submit">Submit</button>
+    </form>
+    <section class="long-section">
+
+    </section>
+  </body>
+</html>

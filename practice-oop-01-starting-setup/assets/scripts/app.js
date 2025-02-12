@@ -123,6 +123,7 @@ class ProjectItem {
     if (this.hasActiveTooltip) {
       return;
     }
+    //before we create a Tooltip, let's access the DOM 
     //create a new tooltip using the tooltip class
     //passing an anonymous function that will set the hasActiveTooltip property to false
     const tooltip = new Tooltip(() => {
