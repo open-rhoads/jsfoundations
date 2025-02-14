@@ -33,6 +33,18 @@ button:focus {
   height: 3000px;
 }
 
+li {
+  padding: 1rem;
+  border: 1px solid #ccc;
+}
+ul {
+  list-style-type: none;
+}
+.highlight {
+  background-color: red;
+  color: white;
+}
+
 button:hover,
 button:active {
   background: #e92f6d;

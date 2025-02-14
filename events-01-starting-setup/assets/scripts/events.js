@@ -1,4 +1,4 @@
-// const buttons = document.querySelectorAll('button'); // select all buttons. You would use querySelecotr() to select only the first button found
+const button = document.querySelector('button'); // select button(s). querySelector() or querySelecotorAll()
 // const buttonClickHandler = e => { //add a handler function - this will accept the event object as a parameter
 //   console.log(e); //let's log the event object to examine it
 //   //e.target.disabled = true; // disable the button when it is clicked using the disabled property of the target property of event object
@@ -51,3 +51,53 @@ form.addEventListener('submit', e => { //only form elements have the submit even
   console.log(e); // we won't really see this unless we prevent the default of submitting the form
   //then you would need to send the data yourself after validation - HTTP request, which we will cover later
 });
+
+// add another button listener...let's examine event propagation
+// with these techniques, we can create event delegation
+const div = document.querySelector('div');
+div.addEventListener('click', event => {
+  console.log('Clicked the div!');
+  console.log(event);
+}, true);
+button.addEventListener('click', function(e) { //converted to traditional function syntax so that 'this' is respected and refers to the element that triggers the event
+  e.stopPropagation();
+  e.stopImmediatePropagation();
+  console.log('Clicked the button!');
+  console.log(e);
+  console.log(this);
+});
+
+// delegation to color a clicked list item
+
+// APPROACH 1: select all list items. this approach is cumbersome to add all the listeners and it can be bad for performance
+const listItems = document.querySelectorAll('li');
+// loop through and pass each one to anonymous function
+// listItems.forEach(listItem => {
+//   listItem.addEventListener('click', e => {
+//     e.target.classList.toggle('highlight'); //toggle the highlight class, which we will style with CSS
+//   });
+// });
+
+// APPROACH 2: delegation via propagation of the event bubbling up - this accomplishes the same as above with only one listener
+const list = document.querySelector('ul');
+list.addEventListener('click', function(e) {
+     // e.target.classList.toggle('highlight'); //toggle the highlight class, which we will style with CSS
+     // even though this listener is on the whole list, the target will refer to the list item that is clicked
+     // this is problematic though if the element has children, it's possible that not the whole item gets highlighted
+     // there is currentTarget, which is always the element that has the listener, but this is also not what we need (would be the whole list)
+     // instead we can use event.target with the closest() method (exists for all DOM elements) and pass in a selector - finds closest matching ancestor
+     e.target.closest('li').classList.toggle('highlight'); // includes the element you clicked
+     //form.submit(); // this triggers this event programmatically - available for other events and DOM elements too
+     button.click(); 
+     // how is this the submit when it is not the first button and we used querySelector()...
+     console.log(this); // this is the currentTarget - the element that has the listener
+});
+
+// instead of listening, you might want to trigger an event to occur programmatically
+// i.e. when we click any list item, we want the form to submit
+// if you trigger a submit event programmatically, any respective event listener that is defined is skipped
+// the click event does not do this, so you could get around it by using a click event on the submit button instead
+
+// one note about the 'this' keyword - in a listener it is bound to the event source...
+
+
