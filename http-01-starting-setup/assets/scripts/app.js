@@ -36,6 +36,8 @@ function sendHttpRequest(method, url, data) {
   //     if (httpRequest.status >= 200 && httpRequest.status < 300) {
   //       resolve(httpRequest.response); // Resolve with the response data
   //     } else {
+            // when using XMLHttp, you can still access the response here for error handling
+            // httpRequest.response;
   //       reject(new Error('Something went wrong!')); // Reject on failure - server issue
   //     }
   //   }
@@ -51,26 +53,40 @@ function sendHttpRequest(method, url, data) {
 //   return promise; // return the promise 
 
   // let's use the more modern fetch() API; centered around the global fetch() function in JS
+  // fetch takes a URL & an optional object parameter to configure the request. It is natively Promise based, so we don't need to build one
+  // there are also response.text() for text & response.blob() for files, but not applicable here 
   return fetch(url, {
     // some keys you can set here like method
     method: method,
-    body: JSON.stringify(data),
-    headers: { // extra information for the request
-      'Content-Type': 'application/json' // this is a typical header added to JSON POST requests because it tells the server to expect JSON
-    }
+    body: data/* JSON.stringify(data) */, // If we are passing FormData to the request, we don't need a header and the data can be sent without parsing
+    // headers: { // extra information for the request
+    //   'Content-Type': 'application/json' // this is a typical header added to JSON POST requests because it tells the server to expect JSON
+    // }
   }).then(response => {
-    return response.json(); // unlike XMLHttpRequest, fetch() does not give parsed response. You have to use the response.json() method
-    // which yields a new Promise and turns the 'streamed' data into a 'snapshot'
-  }); // fetch takes a URL & an optional object parameter to configure the request. It is natively Promise based, so we don't need to build one
-  // there are also response.text() for text & response.blob() for files, but not applicable here 
-  
+    // let's implement a condition here to catch any server responses that indicate an issue
+    if (response.status >= 200 && response.status < 300) {
+      return response.json(); // unlike XMLHttpRequest, fetch() does not give parsed response. You have to use the response.json() method
+      // which yields a new Promise and turns the 'streamed' data into a 'snapshot'
+    } else {
+      // because the data is streamed with the fetch method, it is not longer available here
+      // we need to call response.json() again, which will still not yield the exact data, but a promise.
+      return response.json().then(errorData => { // turn the response to json again, returning promise and use .then() to handle the error data
+        console.log(errorData);
+        throw new Error('Something went wrong - server side.');
+      }); // you have to return this promise chain to get the error object to work right
+      // we cannot use another .then() method above to return response.json() no matter what and then check the response status; because the response object would then not be available anymore
+      // we also cannot nest another .then() method inside this existing one...
+    }
+  }) /* .catch(e => { }) */; 
+  // using a catch method here or a catch block elsewhere would not catch server issues 
+  // where there is technically a response, but it is a server issue, just like with the XMLHttpRequest
 }
 
 async function getPosts() {
   try {
     const responseData = await sendHttpRequest(
       'GET',
-      'https://jsonplaceholder.typicode.com/posts'
+      'https://jsonplaceholder.typicode.com/posts'  
     );
     // instead of using the .response property of the httpRequest, we can tap into the responseData directly stored in the variable via async await
     const listOfPosts = responseData; 
@@ -86,7 +102,8 @@ async function getPosts() {
       listElement.append(postEl); // append the posts to the list element
     }
   } catch (error) {
-    alert(error.message);
+    // alert(error.message);
+    console.log(error); // this catches the error, if it gets generated when the promise returns from Http function above
   }
 }
 
@@ -98,8 +115,16 @@ async function createPost(title, content) {
     body: content,
     userId: postId
   };
+
+  const formData = new FormData(form); // this is built into JS/the browser where you can add key/value pairs; sent differently than json. Different format
+  // if we pass a form element to the FormData constructor, it will try to parse the values in the form fields, but they need the name attribute
+  // now we can use the append() method to add any additional key/value pairs and prepare the form data object which can be sent in the response
+  // formData.append('title', title);
+  // formData.append('body', content);
+  formData.append('userId', postId);
+
   try { // use our Http Request function to send a POST request this time, same URL, send the post data for the body using the optional third argument
-    const response = await sendHttpRequest('POST', 'https://jsonplaceholder.typicode.com/posts', post);
+    const response = await sendHttpRequest('POST', 'https://jsonplaceholder.typicode.com/posts', formData);
     // Log the response data to check its structure
     console.log('Full response from the API:', response);
     // Check the structure of the response
